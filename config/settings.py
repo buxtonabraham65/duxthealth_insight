@@ -199,14 +199,20 @@ STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
 
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": (
+            "blog.storage.CloudinaryMediaStorage"
+            if not DEBUG
+            else "django.core.files.storage.FileSystemStorage"
+        ),
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
 
 
 # =====================================================
