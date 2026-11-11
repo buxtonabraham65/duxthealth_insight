@@ -1,0 +1,196 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ article.meta_title|default:article.title }} | DuxtHealth Insights{% endblock %}
+
+{% block content %}
+
+<main class="article-page">
+
+    <div class="article-container">
+
+        <!-- Breadcrumb -->
+        <nav class="article-breadcrumb">
+            <a href="{% url 'home' %}">Home</a>
+            <span>/</span>
+            <span>{{ article.category.name }}</span>
+        </nav>
+
+        <!-- Article Header -->
+        <header class="article-header">
+
+            <span class="article-category">
+                {{ article.category.name }}
+            </span>
+
+            <h1>{{ article.title }}</h1>
+
+            {% if article.subtitle %}
+                <p class="article-subtitle">{{ article.subtitle }}</p>
+            {% endif %}
+
+            {% if article.excerpt %}
+                <p class="article-excerpt">{{ article.excerpt }}</p>
+            {% endif %}
+
+            <div class="article-byline">
+
+                {% if article.author %}
+                    <span>
+                        By <strong>{{ article.author.display_name }}</strong>
+                    </span>
+                {% endif %}
+
+                {% if article.published_at %}
+                    <span>
+                        {{ article.published_at|date:"F j, Y" }}
+                    </span>
+                {% endif %}
+
+                <span>{{ article.views }} views</span>
+
+            </div>
+
+        </header>
+
+        <!-- Cover Image -->
+        {% if article.cover_image %}
+            <figure class="article-cover">
+                <img
+                    src="{{ article.cover_image.url }}"
+                    alt="{{ article.title }}"
+                >
+
+                {% if article.caption %}
+                    <figcaption>{{ article.caption }}</figcaption>
+                {% endif %}
+            </figure>
+        {% endif %}
+
+        <!-- Article Body -->
+        <div class="article-layout">
+
+            <article class="article-body">
+
+                {% if article.medically_reviewed and article.reviewer %}
+                    <div class="medical-review-notice">
+                        <strong>Medical review information</strong>
+                        <p>
+                            This article is marked as medically reviewed by
+                            {{ article.reviewer.full_name }}.
+                        </p>
+                        {% if article.reviewer.professional_title %}
+                            <p>{{ article.reviewer.professional_title }}</p>
+                        {% endif %}
+                        {% if article.reviewer.qualifications %}
+                            <p>{{ article.reviewer.qualifications }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <div class="article-content">
+                    {{ article.body|linebreaks }}
+                </div>
+
+                <!-- Tags -->
+                {% if article.tags.all %}
+                    <div class="article-tags">
+                        <strong>Topics:</strong>
+                        {% for tag in article.tags.all %}
+                            <span>{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- References -->
+                {% if article.references %}
+                    <section class="article-references">
+                        <h2>References and Sources</h2>
+                        {{ article.references|linebreaks }}
+                    </section>
+                {% endif %}
+
+                <!-- Disclaimer -->
+                <div class="article-disclaimer">
+                    <strong>Health information disclaimer</strong>
+                    <p>
+                        This article is intended for general health education.
+                        It does not replace professional medical advice,
+                        diagnosis or treatment. Consult a qualified healthcare
+                        professional about your individual health concerns.
+                    </p>
+                </div>
+
+                <!-- Sharing -->
+                <div class="article-share">
+                    <h3>Share this article</h3>
+
+                    <a
+                        href="https://wa.me/?text={{ article.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Share on WhatsApp
+                    </a>
+
+                    <a
+                        href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Share on Facebook
+                    </a>
+                </div>
+
+            </article>
+
+        </div>
+
+        <!-- Related Articles -->
+        {% if related_articles %}
+            <section class="related-articles">
+
+                <h2>Related Health Articles</h2>
+
+                <div class="related-articles-grid">
+
+                    {% for related in related_articles %}
+                        <a
+                            href="{% url 'article_detail' related.slug %}"
+                            class="related-article-card"
+                        >
+
+                            {% if related.cover_image %}
+                                <img
+                                    src="{{ related.cover_image.url }}"
+                                    alt="{{ related.title }}"
+                                >
+                            {% endif %}
+
+                            <div class="related-article-info">
+                                <span>{{ related.category.name }}</span>
+                                <h3>{{ related.title }}</h3>
+
+                                {% if related.excerpt %}
+                                    <p>{{ related.excerpt|truncatewords:20 }}</p>
+                                {% endif %}
+                            </div>
+
+                        </a>
+                    {% endfor %}
+
+                </div>
+
+            </section>
+        {% endif %}
+
+        <div class="back-home">
+            <a href="{% url 'home' %}">← Back to DuxtHealth Insights</a>
+        </div>
+
+    </div>
+
+</main>
+
+{% endblock %}

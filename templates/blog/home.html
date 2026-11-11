@@ -1,0 +1,507 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}DuxtHealth Insights | Trusted Health Knowledge for Everyone{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+
+<!-- HERO SECTION -->
+<section class="hero-section home-hero">
+    <div class="hero-background-overlay"></div>
+
+    <div class="container hero-grid">
+        <div class="hero-content">
+
+            <span class="section-kicker">
+                DUXTHEALTH INSIGHTS
+            </span>
+
+            <h1>
+                Health Knowledge
+                for <span>Everyday Life.</span>
+            </h1>
+
+            <p class="hero-description">
+                Clear, practical and trusted health information
+                to help you understand health issues, make informed
+                decisions and support healthier communities.
+            </p>
+
+            <div class="hero-actions">
+
+                <a href="#latest" class="primary-button">
+                    Explore Articles →
+                </a>
+
+                {% if categories %}
+                <a href="#topics" class="secondary-button">
+                    Browse Topics
+                </a>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+<!-- FEATURED ARTICLE -->
+{% if featured_article %}
+
+<section class="featured-section home-featured">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="section-kicker">
+                    EDITOR'S PICK
+                </span>
+
+                <h2>Featured Story</h2>
+            </div>
+
+        </div>
+
+
+        <article class="featured-card">
+
+            <div class="featured-image">
+
+                <a href="{% url 'article_detail' featured_article.slug %}">
+
+                    {% if featured_article.cover_image %}
+
+                    <img
+                        src="{{ featured_article.cover_image.url }}"
+                        alt="{{ featured_article.title }}"
+                        loading="eager"
+                    >
+
+                    {% else %}
+
+                    <div class="image-placeholder">
+                        <span>DUXTHEALTH INSIGHTS</span>
+                    </div>
+
+                    {% endif %}
+
+                </a>
+
+            </div>
+
+
+            <div class="featured-content">
+
+                {% if featured_article.category %}
+                <span class="article-category">
+                    {{ featured_article.category.name }}
+                </span>
+                {% endif %}
+
+
+                <h3>
+                    <a href="{% url 'article_detail' featured_article.slug %}">
+                        {{ featured_article.title }}
+                    </a>
+                </h3>
+
+
+                {% if featured_article.excerpt %}
+
+                <p>
+                    {{ featured_article.excerpt|truncatewords:35 }}
+                </p>
+
+                {% elif featured_article.subtitle %}
+
+                <p>
+                    {{ featured_article.subtitle|truncatewords:35 }}
+                </p>
+
+                {% endif %}
+
+
+                <div class="article-meta">
+
+                    {% if featured_article.author %}
+
+                    <span>
+                        By {{ featured_article.author.display_name }}
+                    </span>
+
+                    {% endif %}
+
+
+                    {% if featured_article.published_at %}
+
+                    <span>
+                        {{ featured_article.published_at|date:"M d, Y" }}
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <a
+                    href="{% url 'article_detail' featured_article.slug %}"
+                    class="read-more"
+                >
+                    Read Featured Article →
+                </a>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+
+<!-- LATEST ARTICLES -->
+<section class="latest-section home-latest" id="latest">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-kicker">
+                    FRESH FROM DUXTHEALTH
+                </span>
+
+                <h2>Latest Articles</h2>
+
+                <p>
+                    Discover our newest health education,
+                    medical information and public health stories.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if latest_articles %}
+
+        <div class="article-grid">
+
+            {% for article in latest_articles %}
+
+            <article class="article-card">
+
+                <a
+                    href="{% url 'article_detail' article.slug %}"
+                    class="article-image"
+                    aria-label="Read {{ article.title }}"
+                >
+
+                    {% if article.cover_image %}
+
+                    <img
+                        src="{{ article.cover_image.url }}"
+                        alt="{{ article.title }}"
+                        loading="lazy"
+                    >
+
+                    {% else %}
+
+                    <div class="image-placeholder">
+                        <span>DUXTHEALTH</span>
+                    </div>
+
+                    {% endif %}
+
+                </a>
+
+
+                <div class="article-card-content">
+
+                    {% if article.category %}
+
+                    <span class="article-category">
+                        {{ article.category.name }}
+                    </span>
+
+                    {% endif %}
+
+
+                    <h3>
+                        <a href="{% url 'article_detail' article.slug %}">
+                            {{ article.title }}
+                        </a>
+                    </h3>
+
+
+                    {% if article.excerpt %}
+
+                    <p>
+                        {{ article.excerpt|truncatewords:20 }}
+                    </p>
+
+                    {% elif article.subtitle %}
+
+                    <p>
+                        {{ article.subtitle|truncatewords:20 }}
+                    </p>
+
+                    {% endif %}
+
+
+                    <div class="article-card-footer">
+
+                        {% if article.published_at %}
+
+                        <span>
+                            {{ article.published_at|date:"M d, Y" }}
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'article_detail' article.slug %}"
+                        class="read-more"
+                    >
+                        Read Article →
+                    </a>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <h3>New health articles are coming soon.</h3>
+
+            <p>
+                Our latest publications will appear here
+                as soon as they are published.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+
+
+<!-- HEALTH TOPICS -->
+{% if categories %}
+
+<section class="categories-section home-topics" id="topics">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <div class="topics-heading-content">
+
+                <span class="section-kicker">
+                    EXPLORE BY SUBJECT
+                </span>
+
+                <h2>Explore Health Topics</h2>
+
+                <p>
+                    Browse trusted health information organised
+                    around the health topics that matter to you.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="home-topic-links">
+
+            {% for category in categories %}
+
+            <a
+                href="{% url 'category_detail' category.slug %}"
+                class="home-topic-link"
+            >
+
+                <span class="topic-link-content">
+                    <span class="topic-link-name">
+                        {{ category.name }}
+                    </span>
+
+                    <span class="topic-link-description">
+                        Explore health information and articles
+                    </span>
+                </span>
+
+                <span class="topic-link-arrow" aria-hidden="true">
+                    →
+                </span>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+
+<!-- NEWSLETTER -->
+<section class="newsletter-section home-newsletter" id="newsletter">
+
+    <div class="container newsletter-container">
+
+        <span class="section-kicker">
+            DUXTHEALTH INSIGHTS NEWSLETTER
+        </span>
+
+
+        <h2>
+            Useful Health Knowledge,
+            <span>Delivered to Your Inbox.</span>
+        </h2>
+
+
+        <p>
+            Subscribe to receive new health education
+            articles and updates from DuxtHealth Insights.
+        </p>
+
+
+        {% if messages %}
+
+        <div class="newsletter-messages" aria-live="polite">
+
+            {% for message in messages %}
+
+            <div class="newsletter-message {{ message.tags }}">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+
+        <form
+            method="POST"
+            action="{% url 'subscribe_newsletter' %}"
+            class="newsletter-form"
+        >
+
+            {% csrf_token %}
+
+
+            <div class="newsletter-input-group">
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email address"
+                    aria-label="Your email address"
+                    autocomplete="email"
+                    required
+                >
+
+
+                <button type="submit">
+                    Subscribe
+                </button>
+
+            </div>
+
+
+
+            <label class="newsletter-consent">
+
+                <input
+                    type="checkbox"
+                    name="consent"
+                    required
+                >
+
+                <span>
+                    I agree to receive health education updates
+                    and newsletters from DuxtHealth Insights.
+                    I understand that I can unsubscribe at any time.
+                </span>
+
+            </label>
+
+        </form>
+
+
+
+        <p class="newsletter-privacy">
+            Your email address is used for newsletter
+            communications only. We respect your privacy.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- HEALTH DISCLAIMER -->
+<section class="disclaimer-section">
+
+    <div class="container disclaimer-content">
+
+        <span class="disclaimer-icon">
+            ⓘ
+        </span>
+
+
+        <div>
+
+            <strong>
+                Health Information Notice
+            </strong>
+
+            <p>
+                DuxtHealth Insights provides general health
+                education and information, not personal diagnosis
+                or treatment. Consult a qualified healthcare
+                professional about your personal health concerns.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

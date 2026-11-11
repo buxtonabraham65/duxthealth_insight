@@ -1,0 +1,202 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{{ category.name }} | DuxtHealth Insights
+{% endblock %}
+
+{% block content %}
+
+<main class="category-page">
+
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav class="category-breadcrumb">
+            <a href="{% url 'home' %}">Home</a>
+            <span>/</span>
+            <span>Health Topics</span>
+            <span>/</span>
+            <strong>{{ category.name }}</strong>
+        </nav>
+
+        <!-- Category Header -->
+        <header class="category-page-header">
+
+            <span class="section-kicker">
+                EXPLORE HEALTH KNOWLEDGE
+            </span>
+
+            <h1>{{ category.name }}</h1>
+
+            {% if category.description %}
+                <p>{{ category.description }}</p>
+            {% else %}
+                <p>
+                    Explore health education and informative
+                    publications from DuxtHealth Insights.
+                </p>
+            {% endif %}
+
+            <div class="category-result-count">
+                {{ page_obj.paginator.count }}
+                publication{{ page_obj.paginator.count|pluralize }}
+                in this topic
+            </div>
+
+        </header>
+
+        <!-- Articles -->
+        <section class="category-articles">
+
+            {% if articles %}
+
+                <div class="article-grid">
+
+                    {% for article in articles %}
+
+                        <article class="article-card">
+
+                            <a
+                                href="{% url 'article_detail' article.slug %}"
+                                class="article-image"
+                            >
+
+                                {% if article.cover_image %}
+                                    <img
+                                        src="{{ article.cover_image.url }}"
+                                        alt="{{ article.caption|default:article.title }}"
+                                        loading="lazy"
+                                    >
+                                {% else %}
+                                    <div class="image-placeholder">
+                                        <span>DUXTHEALTH</span>
+                                    </div>
+                                {% endif %}
+
+                            </a>
+
+                            <div class="article-card-content">
+
+                                <span class="article-category">
+                                    {{ category.name }}
+                                </span>
+
+                                <h3>
+                                    <a href="{% url 'article_detail' article.slug %}">
+                                        {{ article.title }}
+                                    </a>
+                                </h3>
+
+                                {% if article.excerpt %}
+                                    <p>
+                                        {{ article.excerpt|truncatewords:25 }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="article-card-footer">
+
+                                    <span>
+                                        {{ article.published_at|date:"M d, Y" }}
+                                    </span>
+
+                                    <span>
+                                        {{ article.views }} reads
+                                    </span>
+
+                                </div>
+
+                                <a
+                                    href="{% url 'article_detail' article.slug %}"
+                                    class="read-more"
+                                >
+                                    Read Article →
+                                </a>
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+
+                    <nav class="category-pagination" aria-label="Article pages">
+
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" aria-label="First page">
+                                First
+                            </a>
+
+                            <a
+                                href="?page={{ page_obj.previous_page_number }}"
+                                aria-label="Previous page"
+                            >
+                                Previous
+                            </a>
+                        {% endif %}
+
+                        <span class="current-page">
+                            Page {{ page_obj.number }}
+                            of {{ page_obj.paginator.num_pages }}
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a
+                                href="?page={{ page_obj.next_page_number }}"
+                                aria-label="Next page"
+                            >
+                                Next
+                            </a>
+
+                            <a
+                                href="?page={{ page_obj.paginator.num_pages }}"
+                                aria-label="Last page"
+                            >
+                                Last
+                            </a>
+                        {% endif %}
+
+                    </nav>
+
+                {% endif %}
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <div class="empty-state-icon">✚</div>
+
+                    <h2>No publications in this topic yet.</h2>
+
+                    <p>
+                        We are preparing informative publications
+                        for this health topic. Please check back soon.
+                    </p>
+
+                    <a href="{% url 'home' %}" class="primary-button">
+                        Return to Homepage →
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+        <!-- Back to Homepage -->
+        <div class="category-back-home">
+            <a href="{% url 'home' %}">
+                ← Back to DuxtHealth Insights
+            </a>
+        </div>
+
+    </div>
+
+</main>
+
+{% endblock %}

@@ -1,0 +1,243 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+Search Health Articles | DuxtHealth Insights
+{% endblock %}
+
+{% block meta_description %}
+Search DuxtHealth Insights for health education, medical information, disease prevention and wellness articles.
+{% endblock %}
+
+{% block content %}
+
+<section class="search-page">
+
+    <div class="container">
+
+        <!-- BREADCRUMB -->
+
+        <div class="search-breadcrumb">
+            <a href="{% url 'home' %}">Home</a>
+            <span>/</span>
+            <span>Search</span>
+        </div>
+
+
+        <!-- SEARCH HEADER -->
+
+        <div class="search-page-header">
+
+            <span class="section-eyebrow">
+                DUXTHEALTH INSIGHTS
+            </span>
+
+            <h1>Search Health Information</h1>
+
+            <p>
+                Explore reliable health education, disease prevention
+                information and health-related publications.
+            </p>
+
+        </div>
+
+
+        <!-- SEARCH FORM -->
+
+        <form
+            action="{% url 'search_articles' %}"
+            method="GET"
+            class="main-search-form">
+
+            <input
+                type="search"
+                name="q"
+                value="{{ query }}"
+                placeholder="What health information are you looking for?"
+                aria-label="Search health articles"
+                required
+            >
+
+            <button type="submit">
+                Search Articles
+            </button>
+
+        </form>
+
+
+        <!-- SEARCH RESULTS -->
+
+        {% if query %}
+
+            <div class="search-results-heading">
+
+                <div>
+                    <h2>Search Results</h2>
+
+                    <p>
+                        Results for:
+                        <strong>"{{ query }}"</strong>
+                    </p>
+                </div>
+
+                <span class="search-result-count">
+                    {{ total_results }}
+                    result{{ total_results|pluralize }}
+                </span>
+
+            </div>
+
+
+            {% if articles %}
+
+                <div class="articles-grid">
+
+                    {% for article in articles %}
+
+                        <article class="article-card">
+
+                            <a
+                                href="{% url 'article_detail' article.slug %}"
+                                class="article-card-image">
+
+                                {% if article.cover_image %}
+
+                                    <img
+                                        src="{{ article.cover_image.url }}"
+                                        alt="{{ article.title }}"
+                                        loading="lazy"
+                                    >
+
+                                {% else %}
+
+                                    <div class="article-placeholder">
+                                        <span>DUXTHEALTH INSIGHTS</span>
+                                    </div>
+
+                                {% endif %}
+
+                            </a>
+
+
+                            <div class="article-card-content">
+
+                                <span class="article-category">
+                                    {{ article.category.name }}
+                                </span>
+
+                                <h3>
+                                    <a href="{% url 'article_detail' article.slug %}">
+                                        {{ article.title }}
+                                    </a>
+                                </h3>
+
+                                {% if article.excerpt %}
+
+                                    <p>
+                                        {{ article.excerpt|truncatewords:25 }}
+                                    </p>
+
+                                {% endif %}
+
+                                <div class="article-card-meta">
+
+                                    <span>
+                                        {{ article.published_at|date:"M d, Y" }}
+                                    </span>
+
+                                    <a href="{% url 'article_detail' article.slug %}">
+                                        Read Article →
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- PAGINATION -->
+
+                {% if page_obj.has_other_pages %}
+
+                    <div class="search-pagination">
+
+                        {% if page_obj.has_previous %}
+
+                            <a href="?q={{ query|urlencode }}&page={{ page_obj.previous_page_number }}">
+                                Previous
+                            </a>
+
+                        {% endif %}
+
+
+                        <span>
+                            Page {{ page_obj.number }}
+                            of {{ page_obj.paginator.num_pages }}
+                        </span>
+
+
+                        {% if page_obj.has_next %}
+
+                            <a href="?q={{ query|urlencode }}&page={{ page_obj.next_page_number }}">
+                                Next
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+
+            {% else %}
+
+                <!-- NO RESULTS -->
+
+                <div class="search-empty-state">
+
+                    <h2>No articles found</h2>
+
+                    <p>
+                        We couldn't find any published articles
+                        matching "{{ query }}".
+                    </p>
+
+                    <p>
+                        Try another keyword, topic or health condition.
+                    </p>
+
+                    <a href="{% url 'home' %}">
+                        Explore Latest Articles
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        {% else %}
+
+            <div class="search-empty-state">
+
+                <h2>What would you like to learn about?</h2>
+
+                <p>
+                    Enter a health topic, disease, medical term
+                    or wellness subject in the search box above.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+</section>
+
+{% endblock %}

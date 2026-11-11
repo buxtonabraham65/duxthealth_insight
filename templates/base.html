@@ -1,0 +1,425 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#005B55">
+
+    <meta name="description"
+          content="{% block meta_description %}DuxtHealth Insights provides accessible health education, medical news, disease prevention information and public health knowledge.{% endblock %}">
+
+    <meta name="robots" content="index, follow">
+
+    <title>{% block title %}DuxtHealth Insights | Better Health Through Knowledge{% endblock %}</title>
+
+    <!-- SOCIAL SHARING METADATA -->
+    <meta property="og:site_name" content="DuxtHealth Insights">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}DuxtHealth Insights | Better Health Through Knowledge{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Accessible health education, medical news and disease prevention information from DuxtHealth Insights.{% endblock %}">
+    <meta property="og:image" content="{% static 'images/duxthealth-logo.jpg' %}">
+
+    <!-- WEBSITE ICON -->
+    <link rel="icon"
+          href="{% static 'images/duxthealth-logo.jpg' %}"
+          type="image/jpeg">
+
+    <!-- GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- MAIN STYLESHEETS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ACCESSIBILITY: SKIP TO CONTENT -->
+    <a href="#main-content" class="dh-skip-link">
+        Skip to main content
+    </a>
+
+
+    <!-- =====================================
+         ANNOUNCEMENT BAR
+    ====================================== -->
+
+    <div class="dh-announcement-bar">
+        <div class="container dh-announcement-inner">
+
+            <div class="dh-announcement-brand">
+                DUXTHEALTH INSIGHTS
+            </div>
+
+            <p>
+                Knowledge is the foundation of better health.
+            </p>
+
+        </div>
+    </div>
+
+
+    <!-- =====================================
+         MAIN HEADER AND NAVIGATION
+    ====================================== -->
+
+    <header class="dh-main-header">
+
+        <div class="container dh-header-container">
+
+            <!-- BRAND LOGO -->
+            <a href="{% url 'home' %}"
+               class="dh-brand"
+               aria-label="DuxtHealth Insights homepage">
+
+                <img
+                    src="{% static 'images/duxthealth-logo.jpg' %}"
+                    alt="DuxtHealth Logo"
+                    class="dh-brand-logo"
+                >
+
+                <span class="dh-brand-text">
+                    <strong>DUXTHEALTH</strong>
+                    <span>INSIGHTS</span>
+                </span>
+
+            </a>
+
+
+            <!-- MOBILE ACTIONS: DONATE AND MENU -->
+            <div class="dh-mobile-actions">
+
+                <a href="{% url 'home' %}#donations"
+                   class="dh-donate-button">
+
+                    <span aria-hidden="true">♥</span>
+                    Donate
+
+                </a>
+
+                <button
+                    class="dh-menu-toggle"
+                    id="menuToggle"
+                    type="button"
+                    aria-label="Open navigation menu"
+                    aria-expanded="false"
+                    aria-controls="navMenu">
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </button>
+
+            </div>
+
+
+            <!-- MAIN NAVIGATION -->
+            <nav class="dh-nav-menu" id="navMenu">
+
+                <div class="dh-nav-links">
+
+                    <a href="{% url 'home' %}" class="dh-nav-link">
+                        Home
+                    </a>
+
+                    <a href="{% url 'home' %}#latest" class="dh-nav-link">
+                        Latest Articles
+                    </a>
+
+                    <a href="{% url 'home' %}#topics" class="dh-nav-link">
+                        Health Topics
+                    </a>
+
+                    <a href="{% url 'home' %}#about" class="dh-nav-link">
+                        About Us
+                    </a>
+
+                </div>
+
+
+                <!-- DESKTOP SEARCH -->
+                <form
+                    action="{% url 'search_articles' %}"
+                    method="GET"
+                    class="dh-nav-search"
+                    role="search">
+
+                    <label for="dh-search-input"
+                           class="dh-visually-hidden">
+                        Search health articles
+                    </label>
+
+                    <input
+                        type="search"
+                        id="dh-search-input"
+                        name="q"
+                        placeholder="Search health information..."
+                        required
+                    >
+
+                    <button type="submit"
+                            aria-label="Submit search">
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="19"
+                            height="19"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true">
+
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m20 20-4-4"></path>
+
+                        </svg>
+
+                    </button>
+
+                </form>
+
+
+                <!-- DESKTOP DONATE BUTTON -->
+                <a
+                    href="{% url 'home' %}#donations"
+                    class="dh-donate-button">
+
+                    <span aria-hidden="true">♥</span>
+                    Donate
+
+                </a>
+
+            </nav>
+
+        </div>
+
+
+        <!-- =====================================
+             MOBILE SEARCH BAR
+             Always visible on smartphones
+        ====================================== -->
+
+        <div class="container dh-mobile-search">
+
+            <form
+                action="{% url 'search_articles' %}"
+                method="GET"
+                class="dh-nav-search"
+                role="search">
+
+                <label
+                    for="dh-mobile-search-input"
+                    class="dh-visually-hidden">
+
+                    Search health articles
+
+                </label>
+
+                <input
+                    type="search"
+                    id="dh-mobile-search-input"
+                    name="q"
+                    placeholder="Search health information..."
+                    required
+                >
+
+                <button
+                    type="submit"
+                    aria-label="Submit search">
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="19"
+                        height="19"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true">
+
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-4-4"></path>
+
+                    </svg>
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================
+         MAIN CONTENT
+    ====================================== -->
+
+    <main id="main-content">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+
+    <!-- =====================================
+         FOOTER
+    ====================================== -->
+
+    <footer class="dh-main-footer" id="about">
+
+        <div class="container dh-footer-grid">
+
+
+            <!-- BRAND AND DESCRIPTION -->
+            <div class="dh-footer-brand">
+
+                <a href="{% url 'home' %}"
+                   class="dh-footer-logo">
+
+                    <img
+                        src="{% static 'images/duxthealth-logo.jpg' %}"
+                        alt="DuxtHealth Logo"
+                    >
+
+                    <span>
+                        <strong>DUXTHEALTH</strong>
+                        <span>INSIGHTS</span>
+                    </span>
+
+                </a>
+
+                <p>
+                    Making reliable health knowledge accessible
+                    to everyone. We believe informed people make
+                    better health decisions.
+                </p>
+
+                <a href="mailto:duxthealth@gmail.com"
+                   class="dh-footer-contact">
+
+                    Contact DuxtHealth →
+
+                </a>
+
+            </div>
+
+
+            <!-- EXPLORE -->
+            <div class="dh-footer-column">
+
+                <h4>Explore</h4>
+
+                <a href="{% url 'home' %}#latest">
+                    Latest Articles
+                </a>
+
+                <a href="{% url 'home' %}#topics">
+                    Health Topics
+                </a>
+
+                <a href="{% url 'search_articles' %}">
+                    Search Articles
+                </a>
+
+                <a href="{% url 'home' %}#newsletter">
+                    Newsletter
+                </a>
+
+            </div>
+
+
+            <!-- DUXTHEALTH -->
+            <div class="dh-footer-column">
+
+                <h4>DuxtHealth</h4>
+
+                <a href="{% url 'home' %}#about">
+                    About Us
+                </a>
+
+                <a
+                    href="https://duxthealth.com"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Main Website
+
+                </a>
+
+                <a href="mailto:duxthealth@gmail.com">
+                    Contact Us
+                </a>
+
+                <a href="{% url 'home' %}#donations">
+                    Support Our Work
+                </a>
+
+            </div>
+
+
+            <!-- HEALTH INFORMATION -->
+            <div class="dh-footer-column dh-footer-disclaimer">
+
+                <h4>Health Information</h4>
+
+                <p>
+                    Our publications are intended for general
+                    health education and information. They are
+                    not a substitute for professional medical
+                    assessment, diagnosis or treatment.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER BOTTOM -->
+        <div class="dh-footer-bottom">
+
+            <div class="container dh-footer-bottom-inner">
+
+                <p>
+                    © {% now "Y" %} DuxtHealth Insights.
+                    All rights reserved.
+                </p>
+
+                <p>
+                    Knowledge. Prevention. Better Health.
+                </p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================
+         JAVASCRIPT
+    ====================================== -->
+
+    <script src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

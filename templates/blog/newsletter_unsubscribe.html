@@ -1,0 +1,75 @@
+ 
+{% extends "base.html" %}
+
+{% block title %}Newsletter Unsubscribe | DuxtHealth Insights{% endblock %}
+
+{% block content %}
+<section class="newsletter-unsubscribe-page">
+    <div class="container">
+        <div class="newsletter-unsubscribe-card">
+
+            {% if status == "confirm" %}
+
+                <h1>Unsubscribe from DuxtHealth Insights</h1>
+
+                <p>
+                    Are you sure you no longer want to receive
+                    health education updates and publications
+                    from DuxtHealth Insights?
+                </p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit">
+                        Yes, unsubscribe me
+                    </button>
+                </form>
+
+                <p>
+                    If you have changed your mind, you can simply
+                    leave this page.
+                </p>
+
+            {% elif status == "success" %}
+
+                <h1>Unsubscription Successful</h1>
+
+                <p>
+                    Your email address has been unsubscribed
+                    from DuxtHealth Insights.
+                </p>
+
+                <p>
+                    Thank you for being part of our community.
+                    You are welcome to subscribe again in the future.
+                </p>
+
+            {% elif status == "already_unsubscribed" %}
+
+                <h1>Already Unsubscribed</h1>
+
+                <p>
+                    This email address is already unsubscribed
+                    from our newsletter.
+                </p>
+
+            {% else %}
+
+                <h1>Invalid Unsubscribe Link</h1>
+
+                <p>
+                    This unsubscribe link is invalid.
+                    Please contact DuxtHealth Insights if you
+                    need assistance.
+                </p>
+
+            {% endif %}
+
+            <a href="{% url 'home' %}">
+                Return to DuxtHealth Insights
+            </a>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
