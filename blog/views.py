@@ -512,23 +512,32 @@ def donate(request):
                 }
             )
 
-        # CREATE PENDING DONATION
+                # CREATE PENDING DONATION AND INITIALIZE PAYMENT
 
-        donation = Donation.objects.create(
-            donor_name=donor_name,
-            donor_email=donor_email,
-            amount=amount,
-            currency="GHS",
-            message=message,
-            status=Donation.Status.PENDING,
-        )
+        try:
+            donation = Donation.objects.create(
+                donor_name=donor_name,
+                donor_email=donor_email,
+                amount=amount,
+                currency="GHS",
+                message=message,
+                status=Donation.Status.PENDING,
+            )
 
-        # INITIALIZE PAYSTACK PAYMENT
+            # INITIALIZE PAYSTACK PAYMENT
 
-        payment_data, payment_error = initialize_paystack_payment(
-            request,
-            donation
-        )
+            payment_data, payment_error = initialize_paystack_payment(
+                request,
+                donation
+            )
+
+        except Exception:
+            logger.exception(
+                "DUXTHEALTH DONATION PROCESSING ERROR"
+            )
+            raise
+
+        # HANDLE PAYMENT INITIALIZATION FAILURE
 
         if not payment_data:
 
@@ -540,7 +549,6 @@ def donate(request):
                     "form_data": request.POST,
                 }
             )
-
         # REDIRECT DONOR TO PAYSTACK CHECKOUT
 
         return redirect(
