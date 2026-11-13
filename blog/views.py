@@ -20,6 +20,14 @@ from django.views.decorators.http import require_http_methods
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
+from decimal import Decimal, InvalidOperation
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+
+import uuid
+
+import requests
+
 
 def home(request):
 
@@ -391,3 +399,509 @@ def unsubscribe_newsletter(request, token):
             "token": token,
         }
     )
+
+# ==========================================
+# PAYSTACK PAYMENT INITIALIZATION
+# ==========================================
+
+def initialize_paystack_payment(request, donation):
+
+    if not settings.PAYSTACK_SECRET_KEY:
+        return None, "Online payments are temporarily unavailable."
+
+    amount_in_pesewas = int(
+        donation.amount * Decimal("100")
+    )
+
+    callback_url = request.build_absolute_uri(
+        reverse("donation_callback")
+    )
+
+    payload = {
+        "email": donation.donor_email,
+        "amount": amount_in_pesewas,
+        "currency": donation.currency,
+        "reference": str(donation.reference),
+        "callback_url": callback_url,
+        "metadata": {
+            "donation_reference": str(donation.reference),
+            "donor_name": donation.donor_name,
+        },
+    }
+
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.post(
+            f"{settings.PAYSTACK_BASE_URL}/transaction/initialize",
+            json=payload,
+            headers=headers,
+            timeout=30,
+        )
+
+        response.raise_for_status()
+        result = response.json()
+
+        payment_data = result.get("data", {})
+
+        if (
+            result.get("status")
+            and payment_data.get("authorization_url")
+            and payment_data.get("reference") == str(donation.reference)
+        ):
+            return payment_data, None
+
+        return None, "Paystack could not initialize this payment."
+
+    except requests.RequestException:
+        # Keep the donation pending because a network timeout
+        # does not always prove that Paystack rejected the request.
+        return None, (
+            "We could not confirm the payment session. "
+            "Please contact us before trying again."
+        )
+
+    except (ValueError, TypeError):
+        return None, "We received an invalid response from the payment service."
+
+
+
+# ==========================================
+# DUXTHEALTH DONATION PROCESSING
+# ==========================================
+
+def donate(request):
+
+    if request.method == "POST":
+
+        donor_name = request.POST.get(
+            "donor_name", ""
+        ).strip()
+
+        donor_email = request.POST.get(
+            "donor_email", ""
+        ).strip()
+
+        amount_input = request.POST.get(
+            "amount", ""
+        ).strip()
+
+        message = request.POST.get(
+            "message", ""
+        ).strip()
+
+        errors = []
+
+        # VALIDATE DONOR NAME
+
+        if not donor_name:
+            errors.append("Please enter your full name.")
+
+        elif len(donor_name) > 150:
+            errors.append("Your name is too long.")
+
+        # VALIDATE EMAIL
+
+        if not donor_email:
+            errors.append("Please enter your email address.")
+
+        else:
+            try:
+                validate_email(donor_email)
+
+            except ValidationError:
+                errors.append("Please enter a valid email address.")
+
+        # VALIDATE DONATION AMOUNT
+
+        amount = None
+
+        try:
+            amount = Decimal(amount_input)
+
+            if not amount.is_finite():
+                errors.append("Please enter a valid donation amount.")
+
+            elif amount < Decimal("1.00"):
+                errors.append("The minimum donation is GHS 1.00.")
+
+            elif amount > Decimal("1000000.00"):
+                errors.append("The maximum donation is GHS 1,000,000.")
+
+            elif amount.as_tuple().exponent < -2:
+                errors.append(
+                    "Donation amounts can have a maximum of two decimal places."
+                )
+
+        except (InvalidOperation, ValueError):
+            errors.append("Please enter a valid donation amount.")
+
+        # VALIDATE MESSAGE LENGTH
+
+        if len(message) > 2000:
+            errors.append("Your message is too long.")
+
+        # RETURN VALIDATION ERRORS
+
+        if errors:
+            return render(
+                request,
+                "blog/donate.html",
+                {
+                    "form_errors": errors,
+                    "form_data": request.POST,
+                }
+            )
+
+        # CHECK PAYSTACK CONFIGURATION
+
+        if not settings.PAYSTACK_SECRET_KEY:
+
+            return render(
+                request,
+                "blog/donate.html",
+                {
+                    "payment_setup_pending": True,
+                    "form_data": request.POST,
+                }
+            )
+
+        # CREATE PENDING DONATION
+
+        donation = Donation.objects.create(
+            donor_name=donor_name,
+            donor_email=donor_email,
+            amount=amount,
+            currency="GHS",
+            message=message,
+            status=Donation.Status.PENDING,
+        )
+
+        # INITIALIZE PAYSTACK PAYMENT
+
+        payment_data, payment_error = initialize_paystack_payment(
+            request,
+            donation
+        )
+
+        if not payment_data:
+
+            return render(
+                request,
+                "blog/donate.html",
+                {
+                    "payment_initialization_error": payment_error,
+                    "form_data": request.POST,
+                }
+            )
+
+        # REDIRECT DONOR TO PAYSTACK CHECKOUT
+
+        return redirect(
+            payment_data["authorization_url"]
+        )
+
+    # DISPLAY DONATION PAGE
+
+    return render(
+        request,
+        "blog/donate.html"
+    )
+
+
+
+
+# ==========================================
+# PAYSTACK DONATION CALLBACK
+# ==========================================
+
+def donation_callback(request):
+
+    reference = request.GET.get("reference", "").strip()
+
+    if not reference:
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "No payment reference was received. "
+                    "Your donation could not be verified."
+                ]
+            }
+        )
+
+    # VALIDATE THE REFERENCE FORMAT
+
+    try:
+        donation_reference = uuid.UUID(reference)
+
+    except (ValueError, TypeError, AttributeError):
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "The payment reference is invalid."
+                ]
+            }
+        )
+
+    # FIND THE DONATION
+
+    donation = Donation.objects.filter(
+        reference=donation_reference
+    ).first()
+
+    if not donation:
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "We could not find a donation matching this payment."
+                ]
+            }
+        )
+
+    # DO NOT VERIFY AGAIN IF ALREADY SUCCESSFUL
+
+    if donation.status == Donation.Status.SUCCESSFUL:
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "donation": donation,
+                "payment_success": True,
+            }
+        )
+
+    # CHECK PAYSTACK CONFIGURATION
+
+    if not settings.PAYSTACK_SECRET_KEY:
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "Payment verification is temporarily unavailable."
+                ]
+            }
+        )
+
+    # VERIFY PAYMENT DIRECTLY WITH PAYSTACK
+
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.get(
+            f"{settings.PAYSTACK_BASE_URL}/transaction/verify/{reference}",
+            headers=headers,
+            timeout=30,
+        )
+
+        response.raise_for_status()
+        result = response.json()
+
+    except (requests.RequestException, ValueError):
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "We could not verify your payment at this time. "
+                    "Your donation record has been preserved. "
+                    "Please contact us if you have completed payment."
+                ]
+            }
+        )
+
+    # CHECK THE PAYSTACK RESPONSE
+
+    if not isinstance(result, dict) or not result.get("status"):
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "Paystack could not verify this transaction."
+                ]
+            }
+        )
+
+    payment = result.get("data")
+
+    if not isinstance(payment, dict):
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "Paystack returned an invalid payment record."
+                ]
+            }
+        )
+
+    # VERIFY THE TRANSACTION REFERENCE
+
+    if payment.get("reference") != str(donation.reference):
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "The payment reference does not match our donation record."
+                ]
+            }
+        )
+
+    # VERIFY PAYMENT STATUS
+
+    if payment.get("status") != "success":
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "Your payment has not been confirmed as successful. "
+                    "Your donation record is still pending verification."
+                ]
+            }
+        )
+
+    # VERIFY THE PAYMENT AMOUNT
+
+    try:
+        paid_amount = int(payment.get("amount", 0))
+
+    except (ValueError, TypeError):
+        paid_amount = 0
+
+    expected_amount = int(
+        donation.amount * Decimal("100")
+    )
+
+    if paid_amount != expected_amount:
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "The verified payment amount does not match your donation."
+                ]
+            }
+        )
+
+    # VERIFY CURRENCY
+
+    if payment.get("currency") != donation.currency:
+        return render(
+            request,
+            "blog/donate.html",
+            {
+                "form_errors": [
+                    "The payment currency does not match your donation."
+                ]
+            }
+        )
+
+    # UPDATE DONATION SAFELY
+
+    with transaction.atomic():
+
+        donation = Donation.objects.select_for_update().get(
+            pk=donation.pk
+        )
+
+        if donation.status == Donation.Status.PENDING:
+
+            donation.status = Donation.Status.SUCCESSFUL
+
+            donation.paystack_transaction_id = str(
+                payment.get("id", "")
+            )
+
+            donation.paid_at = timezone.now()
+
+            donation.save(
+                update_fields=[
+                    "status",
+                    "paystack_transaction_id",
+                    "paid_at",
+                    "updated_at",
+                ]
+            )
+
+    # DISPLAY PAYMENT SUCCESS
+
+    return render(
+        request,
+        "blog/donate.html",
+        {
+            "donation": donation,
+            "payment_success": True,
+        }
+    )
+
+
+# ==========================================
+# PAYSTACK PAYMENT INITIALIZATION
+# ==========================================
+
+def initialize_paystack_payment(request, donation):
+
+    if not settings.PAYSTACK_SECRET_KEY:
+        return None, "Paystack is not configured."
+
+    amount_in_pesewas = int(
+        donation.amount * Decimal("100")
+    )
+
+    callback_url = request.build_absolute_uri(
+        reverse("donation_callback")
+    )
+
+    payload = {
+        "email": donation.donor_email,
+        "amount": amount_in_pesewas,
+        "currency": donation.currency,
+        "reference": str(donation.reference),
+        "callback_url": callback_url,
+        "metadata": {
+            "donation_reference": str(donation.reference),
+            "donor_name": donation.donor_name,
+        },
+    }
+
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.post(
+            f"{settings.PAYSTACK_BASE_URL}/transaction/initialize",
+            json=payload,
+            headers=headers,
+            timeout=30,
+        )
+
+        response.raise_for_status()
+        result = response.json()
+
+        if (
+            result.get("status")
+            and result.get("data", {}).get("authorization_url")
+        ):
+            return result["data"], None
+
+        return None, "Paystack could not initialize this payment."
+
+    except requests.RequestException:
+        return None, "Unable to connect to Paystack. Please try again."
