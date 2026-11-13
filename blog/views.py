@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.db.models import F
 from django.core.paginator import Paginator
-from .models import Article, Category, ArticleView, NewsletterSubscriber, ArticleNotification
+from .models import Article, Category, ArticleView, NewsletterSubscriber, ArticleNotification, Donation
 from django.db.models import Q
 
 from django.core.exceptions import ValidationError
