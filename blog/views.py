@@ -404,68 +404,7 @@ def unsubscribe_newsletter(request, token):
 # PAYSTACK PAYMENT INITIALIZATION
 # ==========================================
 
-def initialize_paystack_payment(request, donation):
 
-    if not settings.PAYSTACK_SECRET_KEY:
-        return None, "Online payments are temporarily unavailable."
-
-    amount_in_pesewas = int(
-        donation.amount * Decimal("100")
-    )
-
-    callback_url = request.build_absolute_uri(
-        reverse("donation_callback")
-    )
-
-    payload = {
-        "email": donation.donor_email,
-        "amount": amount_in_pesewas,
-        "currency": donation.currency,
-        "reference": str(donation.reference),
-        "callback_url": callback_url,
-        "metadata": {
-            "donation_reference": str(donation.reference),
-            "donor_name": donation.donor_name,
-        },
-    }
-
-    headers = {
-        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-        "Content-Type": "application/json",
-    }
-
-    try:
-        response = requests.post(
-            f"{settings.PAYSTACK_BASE_URL}/transaction/initialize",
-            json=payload,
-            headers=headers,
-            timeout=30,
-        )
-
-        response.raise_for_status()
-        result = response.json()
-
-        payment_data = result.get("data", {})
-
-        if (
-            result.get("status")
-            and payment_data.get("authorization_url")
-            and payment_data.get("reference") == str(donation.reference)
-        ):
-            return payment_data, None
-
-        return None, "Paystack could not initialize this payment."
-
-    except requests.RequestException:
-        # Keep the donation pending because a network timeout
-        # does not always prove that Paystack rejected the request.
-        return None, (
-            "We could not confirm the payment session. "
-            "Please contact us before trying again."
-        )
-
-    except (ValueError, TypeError):
-        return None, "We received an invalid response from the payment service."
 
 
 
