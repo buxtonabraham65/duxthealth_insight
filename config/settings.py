@@ -16,6 +16,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Render environment variables will also be available through os.environ.
 load_dotenv(BASE_DIR / ".env")
 
+# Paystack payment configuration
+PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "")
+PAYSTACK_BASE_URL = "https://api.paystack.co"
+
+
 
 # =====================================================
 # SECURITY AND ENVIRONMENT
