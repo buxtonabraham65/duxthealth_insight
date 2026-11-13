@@ -8,6 +8,7 @@ from .models import (
     ArticleView,
     NewsletterSubscriber,
     ArticleNotification,
+    Donation,
 )
 
 from django.db import transaction
@@ -335,3 +336,56 @@ class ArticleNotificationAdmin(admin.ModelAdmin):
     )
 
     search_fields = ("status",)
+
+
+# ==========================================
+# DUXTHEALTH DONATIONS ADMIN
+# ==========================================
+
+@admin.register(Donation)
+class DonationAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "donor_name",
+        "donor_email",
+        "amount",
+        "currency",
+        "status",
+        "created_at",
+        "paid_at",
+    )
+
+    list_filter = (
+        "status",
+        "currency",
+        "created_at",
+    )
+
+    search_fields = (
+        "donor_name",
+        "donor_email",
+        "reference",
+        "paystack_transaction_id",
+    )
+
+    readonly_fields = (
+        "donor_name",
+        "donor_email",
+        "message",
+        "amount",
+        "currency",
+        "reference",
+        "paystack_transaction_id",
+        "status",
+        "paid_at",
+        "created_at",
+        "updated_at",
+    )
+
+    ordering = ("-created_at",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
