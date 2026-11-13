@@ -467,3 +467,93 @@ class ArticleNotification(models.Model):
 
     def __str__(self):
         return f"Notification: {self.article.title} ({self.status})"
+
+
+# ==========================================
+# 9. DUXTHEALTH DONATIONS
+# ==========================================
+
+class Donation(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SUCCESSFUL = "successful", "Successful"
+        FAILED = "failed", "Failed"
+
+    # DONOR INFORMATION
+
+    donor_name = models.CharField(
+        max_length=150
+    )
+
+    donor_email = models.EmailField()
+
+    message = models.TextField(
+        blank=True
+    )
+
+    # DONATION INFORMATION
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    currency = models.CharField(
+        max_length=3,
+        default="GHS"
+    )
+
+    # PAYMENT REFERENCE
+
+    reference = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
+    )
+
+    paystack_transaction_id = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    # PAYMENT STATUS
+
+    status = models.CharField(
+        max_length=15,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+
+    paid_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    # RECORD MANAGEMENT
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+        indexes = [
+            models.Index(
+                fields=["status", "created_at"]
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.donor_name} - "
+            f"{self.currency} {self.amount} "
+            f"({self.status})"
+        )
+
+
