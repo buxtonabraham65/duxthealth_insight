@@ -1,0 +1,638 @@
+
+{% extends "base.html" %}
+
+{% block title %}Donate | DuxtHealth Insights{% endblock %}
+
+{% block meta_description %}
+Support DuxtHealth Insights in making reliable health education and public health information accessible to everyone.
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+
+/* =====================================
+   DUXTHEALTH DONATION PAGE
+===================================== */
+
+.donation-page {
+    width: 100%;
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #eff8ff, #ffffff, #eaf4ff);
+    box-sizing: border-box;
+}
+
+.donation-page * {
+    box-sizing: border-box;
+}
+
+.donation-container {
+    max-width: 1150px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    align-items: center;
+    gap: 60px;
+}
+
+/* INTRODUCTION */
+
+.donation-intro {
+    padding: 20px 0;
+}
+
+.donation-label {
+    display: inline-block;
+    background: #dff1ff;
+    color: #0879c9;
+    padding: 9px 17px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 22px;
+}
+
+.donation-intro h1 {
+    color: #12345a;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.2;
+    font-weight: 800;
+    margin: 0 0 24px;
+    letter-spacing: -1px;
+}
+
+.donation-intro p {
+    color: #62748a;
+    font-size: 16px;
+    line-height: 1.9;
+    margin-bottom: 17px;
+}
+
+/* FORM CARD */
+
+.donation-form-card {
+    background: #ffffff;
+    padding: 38px;
+    border-radius: 20px;
+    border: 1px solid #e5edf5;
+    box-shadow: 0 15px 50px rgba(21, 65, 105, 0.10);
+}
+
+.donation-form-card h2 {
+    color: #12345a;
+    font-size: 27px;
+    font-weight: 800;
+    margin: 0 0 10px;
+}
+
+.donation-form-description {
+    color: #78899b;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+}
+
+/* INPUT FIELDS */
+
+.donation-form-card .form-group {
+    margin-bottom: 21px;
+}
+
+.donation-form-card label {
+    display: block;
+    color: #243b53;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 9px;
+}
+
+.donation-form-card input,
+.donation-form-card textarea {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #dce5ee;
+    border-radius: 10px;
+    background: #f9fbfd;
+    color: #243b53;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: 0.25s ease;
+}
+
+.donation-form-card input {
+    height: 51px;
+}
+
+.donation-form-card textarea {
+    min-height: 115px;
+    resize: vertical;
+}
+
+.donation-form-card input:focus,
+.donation-form-card textarea:focus {
+    border-color: #0784d1;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(7, 132, 209, 0.10);
+}
+
+.donation-form-card input::placeholder,
+.donation-form-card textarea::placeholder {
+    color: #a1adba;
+}
+
+.donation-form-card .form-group small {
+    display: block;
+    color: #8998a8;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* SUBMIT BUTTON */
+
+.donation-submit-button {
+    display: block;
+    width: 100%;
+    min-height: 54px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0879c9, #0755a5);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: 0.25s ease;
+}
+
+.donation-submit-button:hover {
+    background: linear-gradient(135deg, #076ab0, #063f86);
+    transform: translateY(-2px);
+    box-shadow: 0 9px 22px rgba(7, 85, 165, 0.25);
+}
+
+/* SECURITY NOTE */
+
+.donation-security-note {
+    background: #f0f8ff;
+    border: 1px solid #dceeff;
+    border-radius: 10px;
+    padding: 15px 17px;
+    margin-top: 23px;
+}
+
+.donation-security-note p {
+    color: #60758a;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 0;
+}
+
+.donation-security-note strong {
+    color: #0879c9;
+}
+
+/* DONATION SUCCESS MESSAGE */
+
+.donation-success-message {
+    background: #eaf8f0;
+    border: 1px solid #b9e6ca;
+    border-radius: 12px;
+    padding: 22px;
+    color: #245c3b;
+    line-height: 1.8;
+}
+
+.donation-success-message h3 {
+    color: #197344;
+    margin: 0 0 12px;
+    font-size: 21px;
+}
+
+.donation-success-message p {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* DONATION ERROR MESSAGE */
+
+.donation-error-message {
+    background: #fff1f0;
+    border: 1px solid #ffc9c5;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    color: #a32620;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.donation-error-message ul {
+    padding-left: 20px;
+    margin: 8px 0 0;
+}
+
+/* PAYMENT SETUP NOTICE */
+
+.donation-setup-message {
+    background: #fff8e8;
+    border: 1px solid #f2d89a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 22px;
+    color: #76551a;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.donation-setup-message h3 {
+    color: #875e12;
+    font-size: 19px;
+    margin: 0 0 10px;
+}
+
+.donation-setup-message p {
+    margin: 0;
+}
+
+/* PAYMENT INITIALIZATION NOTICE */
+
+.donation-payment-error {
+    background: #fff1f0;
+    border: 1px solid #ffc9c5;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 22px;
+    color: #a32620;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.donation-payment-error h3 {
+    color: #a32620;
+    font-size: 19px;
+    margin: 0 0 10px;
+}
+
+.donation-payment-error p {
+    margin: 0;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+
+    .donation-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        max-width: 650px;
+    }
+
+    .donation-intro {
+        text-align: center;
+    }
+
+    .donation-intro p {
+        max-width: 550px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .donation-page {
+        padding: 45px 15px;
+    }
+
+    .donation-intro h1 {
+        font-size: 31px;
+    }
+
+    .donation-intro p {
+        font-size: 14px;
+    }
+
+    .donation-form-card {
+        padding: 25px 18px;
+        border-radius: 15px;
+    }
+
+    .donation-form-card h2 {
+        font-size: 23px;
+    }
+
+    .donation-submit-button {
+        min-height: 52px;
+        font-size: 14px;
+    }
+}
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<section class="donation-page">
+
+    <div class="donation-container">
+
+        <!-- INTRODUCTION -->
+
+        <div class="donation-intro">
+
+            <span class="donation-label">
+                SUPPORT OUR MISSION
+            </span>
+
+            <h1>
+                Help Make Health Knowledge Accessible to Everyone
+            </h1>
+
+            <p>
+                Your contribution supports our mission to make reliable
+                health education, disease prevention information and
+                public health knowledge accessible to individuals and
+                communities.
+            </p>
+
+            <p>
+                Every contribution, regardless of size, helps us continue
+                sharing health information that can make a difference.
+            </p>
+
+        </div>
+
+
+        <!-- DONATION FORM CARD -->
+
+        <div class="donation-form-card">
+
+            <h2>Make a Donation</h2>
+
+            <p class="donation-form-description">
+                Complete the details below to continue to our secure
+                payment process.
+            </p>
+
+
+            <!-- SUCCESSFUL PAYMENT CONFIRMATION -->
+
+            {% if payment_success %}
+
+                <div class="donation-success-message">
+
+                    <h3>
+                        Thank You for Your Support!
+                    </h3>
+
+                    <p>
+                        Your payment has been successfully verified.
+                        We sincerely appreciate your contribution
+                        towards the DuxtHealth mission.
+                    </p>
+
+                    <p>
+                        <strong>Payment Status:</strong>
+                        Successfully Verified
+                    </p>
+
+                    <p>
+                        <strong>Donation Reference:</strong>
+                        {{ donation.reference }}
+                    </p>
+
+                    <p>
+                        <strong>Amount Donated:</strong>
+                        {{ donation.currency }} {{ donation.amount }}
+                    </p>
+
+                    <p>
+                        Thank you for supporting accessible health
+                        education and public health information.
+                    </p>
+
+                </div>
+
+
+            <!-- PAYMENT SETUP PENDING -->
+
+            {% elif payment_setup_pending %}
+
+                <div class="donation-setup-message">
+
+                    <h3>
+                        Online Payments Are Not Yet Available
+                    </h3>
+
+                    <p>
+                        Thank you for your interest in supporting
+                        DuxtHealth Insights. Our online payment system
+                        is currently undergoing setup. Please check
+                        back later. No payment has been initiated
+                        and no money has been collected.
+                    </p>
+
+                </div>
+
+
+            <!-- PAYMENT INITIALIZATION ERROR -->
+
+            {% elif payment_initialization_error %}
+
+                <div class="donation-payment-error">
+
+                    <h3>
+                        Unable to Start Your Payment
+                    </h3>
+
+                    <p>
+                        {{ payment_initialization_error }}
+                    </p>
+
+                    <p>
+                        No successful payment has been confirmed.
+                        If you believe you have already completed a
+                        payment, please contact DuxtHealth before
+                        trying again.
+                    </p>
+
+                </div>
+
+
+            <!-- LEGACY DONATION CREATED MESSAGE -->
+
+            {% elif donation_created %}
+
+                <div class="donation-success-message">
+
+                    <h3>
+                        Donation Details Received
+                    </h3>
+
+                    <p>
+                        Your donation details have been received.
+                        However, your payment has not yet been completed.
+                    </p>
+
+                    <p>
+                        <strong>Donation Reference:</strong>
+                        {{ donation.reference }}
+                    </p>
+
+                    <p>
+                        <strong>Amount:</strong>
+                        {{ donation.currency }} {{ donation.amount }}
+                    </p>
+
+                    <p>
+                        Your donation is currently awaiting payment.
+                    </p>
+
+                </div>
+
+
+            <!-- DONATION FORM AND VALIDATION ERRORS -->
+
+            {% else %}
+
+                {% if form_errors %}
+
+                    <div class="donation-error-message">
+
+                        <strong>Please check the following:</strong>
+
+                        <ul>
+                            {% for error in form_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+
+                    </div>
+
+                {% endif %}
+
+
+                <form method="POST" action="{% url 'donate' %}">
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+
+                        <label for="donor_name">
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="donor_name"
+                            name="donor_name"
+                            placeholder="Enter your full name"
+                            maxlength="150"
+                            autocomplete="name"
+                            value="{{ form_data.donor_name|default:'' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="donor_email">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="donor_email"
+                            name="donor_email"
+                            placeholder="Enter your email address"
+                            autocomplete="email"
+                            value="{{ form_data.donor_email|default:'' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="amount">
+                            Donation Amount (GHS)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            placeholder="e.g. 50.00"
+                            min="1"
+                            max="1000000"
+                            step="0.01"
+                            value="{{ form_data.amount|default:'' }}"
+                            required
+                        >
+
+                        <small>
+                            Enter the amount you wish to contribute
+                            in Ghana cedis.
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="message">
+                            Message (Optional)
+                        </label>
+
+                        <textarea
+                            id="message"
+                            name="message"
+                            rows="4"
+                            maxlength="2000"
+                            placeholder="Leave an optional message..."
+                        >{{ form_data.message|default:'' }}</textarea>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="donation-submit-button"
+                    >
+                        Continue to Secure Payment
+                    </button>
+
+                </form>
+
+
+                <div class="donation-security-note">
+
+                    <p>
+                        <strong>Secure payments:</strong>
+                        When online payments are available,
+                        payment processing will be handled through
+                        Paystack. Your card or Mobile Money payment
+                        details will be entered on Paystack's
+                        secure payment page.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
