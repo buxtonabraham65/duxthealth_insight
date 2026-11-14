@@ -85,6 +85,7 @@ INSTALLED_APPS = [
 
     # DuxtHealth Insight applications
     "blog",
+    "tinymce",
 ]
 
 
