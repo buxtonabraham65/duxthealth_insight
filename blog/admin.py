@@ -1,4 +1,11 @@
+
 from django.contrib import admin
+from django import forms
+from django.db import transaction
+from django.utils import timezone
+
+from tinymce.widgets import TinyMCE
+
 from .models import (
     Category,
     Tag,
@@ -11,10 +18,27 @@ from .models import (
     Donation,
 )
 
-from django.db import transaction
-from django.utils import timezone
-
 from .newsletter import send_article_notification
+
+
+# ==========================================
+# RICH TEXT ARTICLE FORM
+# ==========================================
+
+class ArticleAdminForm(forms.ModelForm):
+
+    body = forms.CharField(
+        widget=TinyMCE(
+            attrs={
+                "cols": 80,
+                "rows": 30,
+            }
+        )
+    )
+
+    class Meta:
+        model = Article
+        fields = "__all__"
 
 
 # ==========================================
@@ -32,7 +56,6 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
     list_filter = ("is_active",)
-
     search_fields = ("name", "description")
 
     prepopulated_fields = {
@@ -48,7 +71,6 @@ class CategoryAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
 
     list_display = ("name", "slug")
-
     search_fields = ("name",)
 
     prepopulated_fields = {
@@ -108,6 +130,8 @@ class MedicalReviewerAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
+
+    form = ArticleAdminForm
 
     list_display = (
         "title",
@@ -218,12 +242,10 @@ class ArticleAdmin(admin.ModelAdmin):
         }),
     )
 
-    ###
     def save_model(self, request, obj, form, change):
 
         was_public = False
 
-        # Check whether the article was already published.
         if obj.pk:
 
             previous = Article.objects.filter(
@@ -237,10 +259,8 @@ class ArticleAdmin(admin.ModelAdmin):
                     and previous.published_at <= timezone.now()
                 )
 
-        # Save the article first.
         super().save_model(request, obj, form, change)
 
-        # Notify subscribers only when the article becomes public.
         if obj.is_public and not was_public:
 
             article_id = obj.pk
@@ -308,9 +328,7 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
 # ==========================================
 
 admin.site.site_header = "DuxtHealth Insights"
-
 admin.site.site_title = "DuxtHealth Publisher"
-
 admin.site.index_title = "Content Management Dashboard"
 
 
