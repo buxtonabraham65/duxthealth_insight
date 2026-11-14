@@ -88,6 +88,19 @@ INSTALLED_APPS = [
     "tinymce",
 ]
 
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 600,
+    "width": "100%",
+    "menubar": True,
+    "plugins": "lists link table code",
+    "toolbar": (
+        "undo redo | blocks | "
+        "bold italic underline | "
+        "alignleft aligncenter alignright alignjustify | "
+        "bullist numlist | "
+        "link table | removeformat"
+    ),
+}
 
 # =====================================================
 # MIDDLEWARE
